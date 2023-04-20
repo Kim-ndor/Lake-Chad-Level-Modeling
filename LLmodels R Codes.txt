@@ -1,0 +1,534 @@
+Lake Chad Level Data Modeling using R Programming Language
+lake = read.csv('E:\\Lake Level\\Lake.csv', header = TRUE)
+>  # Installing/calling packages/libraries
+>  library(jtools)
+>  library(ISLR)
+>  library(MASS)
+> 
+> # Setting the working directory
+>  getwd()
+[1] "E:/Lake Level/Output"
+> 
+> setwd("E:/Lake Level/Output")
+> 
+>           
+> # Setting the random seedto make the results reproducible
+>  
+> set.seed(1)
+> 
+> # Correlation analysis
+> # Cor with p-values for the whole dataset
+> 
+>    #install.packages("Hmisc")
+>    library(Hmisc)
+>  
+> lake = (lake[,2:9])
+>  
+> rp_values = rcorr(as.matrix(lake))
+> rp_values
+        ET    SH    AT    ST     P    SM  LL_R  LL_G
+ET    1.00  0.48 -0.03  0.18  0.56  0.89 -0.09 -0.49
+SH    0.48  1.00  0.19  0.51  0.49  0.42 -0.17 -0.43
+AT   -0.03  0.19  1.00  0.85 -0.17 -0.28 -0.46 -0.27
+ST    0.18  0.51  0.85  1.00  0.12 -0.09 -0.50 -0.43
+P     0.56  0.49 -0.17  0.12  1.00  0.54 -0.29 -0.61
+SM    0.89  0.42 -0.28 -0.09  0.54  1.00  0.13 -0.32
+LL_R -0.09 -0.17 -0.46 -0.50 -0.29  0.13  1.00  0.66
+LL_G -0.49 -0.43 -0.27 -0.43 -0.61 -0.32  0.66  1.00
+
+n= 240 
+
+
+P
+     ET     SH     AT     ST     P      SM     LL_R   LL_G  
+ET          0.0000 0.6740 0.0061 0.0000 0.0000 0.1760 0.0000
+SH   0.0000        0.0034 0.0000 0.0000 0.0000 0.0090 0.0000
+AT   0.6740 0.0034        0.0000 0.0103 0.0000 0.0000 0.0000
+ST   0.0061 0.0000 0.0000        0.0715 0.1491 0.0000 0.0000
+P    0.0000 0.0000 0.0103 0.0715        0.0000 0.0000 0.0000
+SM   0.0000 0.0000 0.0000 0.1491 0.0000        0.0385 0.0000
+LL_R 0.1760 0.0090 0.0000 0.0000 0.0000 0.0385        0.0000
+LL_G 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000       
+> 
+> # Combination of correlation coef. r and correlation test rho
+> 
+> #install.packages("correlation")
+> 
+> library(correlation)
+> 
+> # Correlation Matrix Auto Method
+>   
+> rpvalues = correlation::correlation(lake, include_factors = TRUE, method = "auto")
+> 
+> rpvalues
+# Correlation Matrix (auto-method)
+
+Parameter1 | Parameter2 |     r |         95% CI | t(238) |         p
+---------------------------------------------------------------------
+ET         |         SH |  0.48 | [ 0.38,  0.57] |   8.46 | < .001***
+ET         |         AT | -0.03 | [-0.15,  0.10] |  -0.42 | 0.674    
+ET         |         ST |  0.18 | [ 0.05,  0.30] |   2.77 | 0.049*   
+ET         |          P |  0.56 | [ 0.47,  0.65] |  10.56 | < .001***
+ET         |         SM |  0.89 | [ 0.86,  0.92] |  30.42 | < .001***
+ET         |       LL_R | -0.09 | [-0.21,  0.04] |  -1.36 | 0.447    
+ET         |       LL_G | -0.49 | [-0.58, -0.38] |  -8.56 | < .001***
+SH         |         AT |  0.19 | [ 0.06,  0.31] |   2.96 | 0.031*   
+SH         |         ST |  0.51 | [ 0.41,  0.60] |   9.19 | < .001***
+SH         |          P |  0.49 | [ 0.39,  0.58] |   8.76 | < .001***
+SH         |         SM |  0.42 | [ 0.31,  0.52] |   7.14 | < .001***
+SH         |       LL_R | -0.17 | [-0.29, -0.04] |  -2.63 | 0.063    
+SH         |       LL_G | -0.43 | [-0.53, -0.33] |  -7.44 | < .001***
+AT         |         ST |  0.85 | [ 0.81,  0.88] |  24.80 | < .001***
+AT         |          P | -0.17 | [-0.29, -0.04] |  -2.59 | 0.063    
+AT         |         SM | -0.28 | [-0.39, -0.15] |  -4.43 | < .001***
+AT         |       LL_R | -0.46 | [-0.55, -0.35] |  -7.97 | < .001***
+AT         |       LL_G | -0.27 | [-0.38, -0.15] |  -4.31 | < .001***
+ST         |          P |  0.12 | [-0.01,  0.24] |   1.81 | 0.286    
+ST         |         SM | -0.09 | [-0.22,  0.03] |  -1.45 | 0.447    
+ST         |       LL_R | -0.50 | [-0.59, -0.40] |  -9.00 | < .001***
+ST         |       LL_G | -0.43 | [-0.53, -0.32] |  -7.42 | < .001***
+P          |         SM |  0.54 | [ 0.44,  0.62] |   9.78 | < .001***
+P          |       LL_R | -0.29 | [-0.40, -0.17] |  -4.60 | < .001***
+P          |       LL_G | -0.61 | [-0.69, -0.53] | -11.92 | < .001***
+SM         |       LL_R |  0.13 | [ 0.01,  0.26] |   2.08 | 0.193    
+SM         |       LL_G | -0.32 | [-0.43, -0.21] |  -5.27 | < .001***
+LL_R       |       LL_G |  0.66 | [ 0.59,  0.73] |  13.70 | < .001***
+
+p-value adjustment method: Holm (1979)
+Observations: 240
+> 
+> # Creating a report of the correlation test
+> #install.packages("remotes")
+> #install.packages("report")
+> #remotes::install_github("easystats/report")
+> library(report)
+> # LL_R and LL_G
+> LLRG = cor.test(lake$LL_R, lake$LL_G)
+> LLRG
+
+	Pearson's product-moment correlation
+
+data:  lake$LL_R and lake$LL_G
+t = 13.703, df = 238, p-value < 2.2e-16
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.5867934 0.7293738
+sample estimates:
+      cor 
+0.6640786 
+
+> report(LLRG)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_R and lake$LL_G is positive, statistically significant, and very large (r = 0.66, 95% CI [0.59, 0.73], t(238) = 13.70, p < .001)> 
+> # LL_R and climate variables
+> 
+> # ET
+> LLRET = cor.test(lake$LL_R, lake$ET)
+> report(LLRET)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_R and lake$ET is negative, statistically not significant, and very small (r = -0.09, 95% CI [-0.21, 0.04], t(238) = -1.36, p = 0.176)> 
+> # SH
+> LLRSH = cor.test(lake$LL_R, lake$SH)
+> report(LLRSH)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_R and lake$SH is negative, statistically significant, and small (r = -0.17, 95% CI [-0.29, -0.04], t(238) = -2.63, p = 0.009)> 
+> # ST
+> LLRST = cor.test(lake$LL_R, lake$ST)
+> report(LLRST)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_R and lake$ST is negative, statistically significant, and very large (r = -0.50, 95% CI [-0.59, -0.40], t(238) = -9.00, p < .001)> 
+> # AT
+> LLRAT = cor.test(lake$LL_R, lake$AT)
+> report(LLRAT)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_R and lake$AT is negative, statistically significant, and very large (r = -0.46, 95% CI [-0.55, -0.35], t(238) = -7.97, p < .001)> 
+> # P
+> LLRP = cor.test(lake$LL_R, lake$P)
+> report(LLRP)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_R and lake$P is negative, statistically significant, and medium (r = -0.29, 95% CI [-0.40, -0.17], t(238) = -4.60, p < .001)> 
+> # SM
+> LLRSM = cor.test(lake$LL_R, lake$SM)
+> report(LLRSM)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_R and lake$SM is positive, statistically significant, and small (r = 0.13, 95% CI [7.16e-03, 0.26], t(238) = 2.08, p = 0.039)> 
+> 
+> #############LL_G and climate variables##################
+>  # LL_G and climate variables
+> 
+> # ET
+> LLGET = cor.test(lake$LL_G, lake$ET)
+> report(LLGET)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_G and lake$ET is negative, statistically significant, and very large (r = -0.49, 95% CI [-0.58, -0.38], t(238) = -8.56, p < .001)> 
+> # SH
+> LLGSH = cor.test(lake$LL_G, lake$SH)
+> report(LLGSH)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_G and lake$SH is negative, statistically significant, and very large (r = -0.43, 95% CI [-0.53, -0.33], t(238) = -7.44, p < .001)> 
+> # ST
+> LLGST = cor.test(lake$LL_G, lake$ST)
+> report(LLGST)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_G and lake$ST is negative, statistically significant, and very large (r = -0.43, 95% CI [-0.53, -0.32], t(238) = -7.42, p < .001)> 
+> # AT
+> LLGAT = cor.test(lake$LL_G, lake$AT)
+> report(LLGAT)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_G and lake$AT is negative, statistically significant, and medium (r = -0.27, 95% CI [-0.38, -0.15], t(238) = -4.31, p < .001)> 
+> # P
+> LLGP = cor.test(lake$LL_G, lake$P)
+> report(LLGP)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_G and lake$P is negative, statistically significant, and very large (r = -0.61, 95% CI [-0.69, -0.53], t(238) = -11.92, p < .001)> 
+> # SM
+> LLGSM = cor.test(lake$LL_G, lake$SM)
+> report(LLGSM)
+Effect sizes were labelled following Funder's (2019) recommendations.
+
+The Pearson's product-moment correlation between lake$LL_G and lake$SM is negative, statistically significant, and large (r = -0.32, 95% CI [-0.43, -0.21], t(238) = -5.27, p < .001)> 
+> # Time series plot
+> lake_t = (lake[,2:9])
+> fix(lake_t)
+> tslake = ts(lake_t, frequency = 12)
+> plot.ts(tslake)
+> 
+> # Exploring the dataset 
+> 
+> summary(lake) # Summary
+       ET                  SH                 AT              ST       
+ Min.   :1.000e-06   Min.   :0.003926   Min.   :21.37   Min.   :19.63  
+ 1st Qu.:1.300e-05   1st Qu.:0.007485   1st Qu.:25.20   1st Qu.:24.44  
+ Median :2.300e-05   Median :0.012002   Median :26.47   Median :25.96  
+ Mean   :2.284e-05   Mean   :0.011697   Mean   :26.62   Mean   :25.98  
+ 3rd Qu.:3.300e-05   3rd Qu.:0.015124   3rd Qu.:28.18   3rd Qu.:28.07  
+ Max.   :4.600e-05   Max.   :0.030330   Max.   :31.08   Max.   :30.99  
+       P                SM              LL_R            LL_G      
+ Min.   :  0.00   Min.   : 98.57   Min.   :280.2   Min.   :277.8  
+ 1st Qu.:  0.04   1st Qu.:158.04   1st Qu.:280.8   1st Qu.:278.7  
+ Median :  1.25   Median :182.27   Median :281.1   Median :279.2  
+ Mean   : 26.41   Mean   :190.32   Mean   :281.2   Mean   :279.2  
+ 3rd Qu.: 39.11   3rd Qu.:222.01   3rd Qu.:281.5   3rd Qu.:279.7  
+ Max.   :194.19   Max.   :292.34   Max.   :282.3   Max.   :280.8 
+
+
+#### Cross-correlation analysis##########
+> 
+> ######CCF P and LL_R####################
+> 
+> ccf(lake$P, lake$LL_R)> 
+
+# ccf values
+> ccfvalues = ccf(lake$P, lake$LL_R)
+> ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+-0.244 -0.040  0.168  0.354  0.498  0.530  0.368  0.064 -0.267 -0.486 -0.541 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+-0.434 -0.242 -0.021  0.177  0.374  0.542  0.576  0.395  0.088 -0.286 -0.527 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.586 -0.461 -0.251 -0.033  0.161  0.353  0.461  0.485  0.319  0.051 -0.289 
+    13     14     15     16     17     18     19     20 
+-0.518 -0.552 -0.434 -0.236 -0.023  0.174  0.324  0.434
+
+
+> #### Plotting the lagged r values
+> install.packages("astsa")
+> library('astsa')
+> 
+lag2.plot(lake$P, lake$LL_R, 5, pch = 20, cex=3, lwl = 2)
+
+
+
+
+##########CCF P and LL_G#################
+> 
+> ccf(lake$P, lake$LL_G)
+
+#ccfvalues
+> 
+> ccfvalues = ccf(lake$P, lake$LL_G)
+> 
+> ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+-0.010  0.172  0.347  0.479  0.502  0.313 -0.028 -0.365 -0.523 -0.486 -0.334 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+-0.163  0.029  0.232  0.419  0.565  0.585  0.364 -0.045 -0.426 -0.611 -0.577 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.409 -0.224 -0.019  0.184  0.354  0.481  0.463  0.269 -0.085 -0.416 -0.562 
+    13     14     15     16     17     18     19     20 
+-0.516 -0.361 -0.180  0.005  0.210  0.380  0.496  0.485 > > lag2.plot(lake$P, lake$LL_G, 6, pch = 20, cex=3, lwl = 2)
+
+
+#######AT and LL#############
+> 
+> 
+> ######CCF AT and LL_R####################
+> 
+> ccf(lake$AT, lake$LL_R)
+
+> 
+> # ccf values
+> ccfvalues = ccf(lake$AT, lake$LL_R)
+> 
+> ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+ 0.315  0.523  0.591  0.461  0.177 -0.129 -0.321 -0.398 -0.378 -0.307 -0.157 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+ 0.055  0.317  0.548  0.607  0.460  0.137 -0.194 -0.424 -0.496 -0.459 -0.336 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.173  0.053  0.307  0.526  0.596  0.464  0.165 -0.156 -0.376 -0.460 -0.417 
+    13     14     15     16     17     18     19     20 
+-0.306 -0.149  0.062  0.295  0.497  0.550  0.428  0.162 > > #### Plotting the lagged r values
+> 
+> lag2.plot(lake$AT, lake$LL_R, 7, pch = 20, cex=3, lwl = 2)
+
+
+ccf(lake$AT, lake$LL_G)> 
+#ccfvalues
+> 
+> ccfvalues = ccf(lake$AT, lake$LL_G)
+> 
+> ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+ 0.601  0.605  0.404  0.075 -0.220 -0.382 -0.400 -0.351 -0.293 -0.172  0.069 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+ 0.376  0.603  0.599  0.355 -0.009 -0.318 -0.477 -0.470 -0.383 -0.269 -0.124 
+     2      3      4      5      6      7      8      9     10     11     12 
+ 0.118  0.397  0.595  0.574  0.351  0.025 -0.264 -0.420 -0.435 -0.365 -0.277 
+    13     14     15     16     17     18     19     20 
+-0.124  0.112  0.395  0.584  0.568  0.334  0.011 -0.269 
+
+> lag2.plot(lake$AT, lake$LL_G, 8, pch = 20, cex=3, lwl = 2)
+
+
+
+
+> #######SM and LL#############
+>           
+>           
+>           ######CCF SM and LL_R####################
+>           
+> ccf(lake$SM, lake$LL_R)
+
+
+>           
+>           # ccf values
+> ccfvalues = ccf(lake$SM, lake$LL_R)
+>           
+> ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10     -9 
+-0.453 -0.297 -0.058  0.204  0.436  0.578  0.577  0.424  0.153 -0.152 -0.402 -0.529 
+    -8     -7     -6     -5     -4     -3     -2     -1      0      1      2      3 
+-0.507 -0.349 -0.097  0.183  0.436  0.593  0.594  0.430  0.134 -0.201 -0.471 -0.604 
+     4      5      6      7      8      9     10     11     12     13     14     15 
+-0.574 -0.412 -0.177  0.078  0.303  0.438  0.445  0.310  0.063 -0.224 -0.461 -0.578 
+    16     17     18     19     20 
+-0.547 -0.396 -0.173  0.070  0.275 
+
+
+
+> ##########CCF SM and LL_G#################
+>           
+> ccf(lake$SM, lake$LL_G)> 
+
+> #ccfvalues
+> ccfvalues = ccf(lake$SM, lake$LL_G)
+>           
+>           ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10     -9 
+-0.255 -0.021  0.225  0.436  0.547  0.524  0.347  0.057 -0.249 -0.474 -0.562 -0.506 
+    -8     -7     -6     -5     -4     -3     -2     -1      0      1      2      3 
+-0.333 -0.086  0.183  0.417  0.546  0.520  0.327  0.009 -0.323 -0.562 -0.645 -0.577 
+     4      5      6      7      8      9     10     11     12     13     14     15 
+-0.400 -0.156  0.101  0.316  0.426  0.395  0.222 -0.058 -0.354 -0.563 -0.633 -0.574 
+    16     17     18     19     20 
+-0.405 -0.170  0.079  0.287  0.400 
+
+## Plotting the lagged r values
+>           
+>           lag2.plot(lake$SM, lake$LL_G, 5, pch = 20, cex=3, lwl = 2)> 
+
+#######ET and LL#############
+>           
+>           
+>           ######CCF ET and LL_R####################
+>           
+>           ccf(lake$ET, lake$LL_R)> 
+> # ccf values
+>           ccfvalues = ccf(lake$ET, lake$LL_R)
+>           
+>           ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+-0.386 -0.154  0.127  0.379  0.532  0.556  0.447  0.232 -0.047 -0.318 -0.501 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+-0.549 -0.432 -0.174  0.136  0.406  0.571  0.589  0.463  0.217 -0.088 -0.381 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.583 -0.631 -0.507 -0.259  0.035  0.288  0.437  0.452  0.336  0.130 -0.120 
+    13     14     15     16     17     18     19     20 
+-0.362 -0.524 -0.564 -0.452 -0.235  0.034  0.266  0.404 
+
+#### Plotting the lagged r values
+>           
+>           lag2.plot(lake$ET, lake$LL_R, 4, pch = 20, cex=3, lwl = 2)> 
+
+
+> ##########CCF ET and LL_G#################
+>           
+>           ccf(lake$ET, lake$LL_G)
+
+> #ccfvalues
+>           ccfvalues = ccf(lake$ET, lake$LL_G)
+>           
+>           ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+-0.093  0.189  0.411  0.525  0.514  0.381  0.149 -0.130 -0.391 -0.555 -0.563 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+-0.404 -0.139  0.161  0.403  0.525  0.506  0.359  0.105 -0.199 -0.485 -0.661 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.669 -0.504 -0.231  0.064  0.296  0.420  0.412  0.278  0.053 -0.213 -0.458 
+    13     14     15     16     17     18     19     20 
+-0.604 -0.603 -0.459 -0.210  0.066  0.291  0.414  0.413 
+## Plotting the lagged r values
+>           
+>           lag2.plot(lake$ET, lake$LL_G, 7, pch = 20, cex=3, lwl = 2)
+> 
+#######SH and LL#############
+>           
+>           
+>           ######CCF SH and LL_R####################
+>           
+>           ccf(lake$SH, lake$LL_R)> > # ccf values
+>           ccfvalues = ccf(lake$SH, lake$LL_R)
+>           
+>           ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+-0.132  0.137  0.387  0.553  0.600  0.538  0.378  0.145 -0.117 -0.344 -0.456 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+-0.420 -0.223  0.069  0.350  0.547  0.612  0.546  0.365  0.112 -0.168 -0.373 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.458 -0.385 -0.178  0.093  0.338  0.501  0.549  0.478  0.323  0.102 -0.131 
+    13     14     15     16     17     18     19     20 
+-0.325 -0.403 -0.345 -0.161  0.071  0.287  0.435  0.481 
+#### Plotting the lagged r values
+>           
+>           lag2.plot(lake$SH, lake$LL_R, 6, pch = 20, cex=3, lwl = 2)> 
+
+
+
+##########CCF SH and LL_G#################
+>           
+>           ccf(lake$SH, lake$LL_G)
+
+> #ccfvalues
+>           ccfvalues = ccf(lake$SH, lake$LL_G)
+>           
+>           ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+ 0.211  0.430  0.553  0.566  0.477  0.317  0.095 -0.168 -0.387 -0.474 -0.382 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+-0.155  0.139  0.399  0.551  0.580  0.490  0.308  0.056 -0.222 -0.434 -0.483 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.357 -0.108  0.166  0.390  0.516  0.522  0.426  0.251  0.018 -0.229 -0.427 
+    13     14     15     16     17     18     19     20 
+-0.479 -0.372 -0.158  0.090  0.309  0.430  0.445  0.368
+## Plotting the lagged r values
+>           
+>           lag2.plot(lake$SH, lake$LL_G, 7, pch = 20, cex=3, lwl = 2)
+
+#######ST and LL#############
+>           
+>           
+>           ######CCF ST and LL_R####################
+>           
+>           ccf(lake$ST, lake$LL_R)> 
+
+> # ccf values
+>           ccfvalues = ccf(lake$ST, lake$LL_R)
+>           
+>           ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+ 0.203  0.504  0.691  0.686  0.480  0.172 -0.109 -0.309 -0.408 -0.422 -0.324 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+-0.119  0.184  0.501  0.697  0.686  0.462  0.130 -0.190 -0.403 -0.504 -0.469 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.337 -0.102  0.207  0.510  0.698  0.688  0.478  0.160 -0.144 -0.362 -0.454 
+    13     14     15     16     17     18     19     20 
+-0.440 -0.325 -0.108  0.182  0.464  0.639  0.631  0.443 
+> #### Plotting the lagged r values
+>           
+>           lag2.plot(lake$ST, lake$LL_R, 10, pch = 20, cex=3, lwl = 2)
+
+
+> ##########CCF ST and LL_G#################
+>           
+>           ccf(lake$ST, lake$LL_G)
+
+> #ccfvalues
+>           ccfvalues = ccf(lake$ST, lake$LL_G)
+>           
+>           ccfvalues
+
+Autocorrelations of series ‘X’, by lag
+
+   -20    -19    -18    -17    -16    -15    -14    -13    -12    -11    -10 
+ 0.588  0.734  0.652  0.389  0.070 -0.190 -0.337 -0.393 -0.401 -0.324 -0.099 
+    -9     -8     -7     -6     -5     -4     -3     -2     -1      0      1 
+ 0.239  0.561  0.714  0.612  0.323 -0.018 -0.284 -0.430 -0.471 -0.433 -0.304 
+     2      3      4      5      6      7      8      9     10     11     12 
+-0.051  0.288  0.592  0.714  0.619  0.348  0.028 -0.235 -0.389 -0.442 -0.428 
+    13     14     15     16     17     18     19     20 
+-0.312 -0.073  0.262  0.557  0.690  0.586  0.315  0.000 
+
+> ## Plotting the lagged r values
+>           
+>           lag2.plot(lake$ST, lake$LL_G, 10, pch = 20, cex=3, lwl = 2)
+
+
+15
+
+
